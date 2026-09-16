@@ -1,0 +1,65 @@
+// Step 0 — Personal Parameters for MSSV 1923050973 (N = 73)
+// Number of subjects: 8 + (73 mod 7) = 11
+// Pass threshold: 5.0 + (73 mod 4) * 0.5 = 5.5
+// Credits per subject: 2 + ((73 + index) mod 3)
+
+export type SubjectStatus = 'passed' | 'failed' | 'in_progress' | 'retake';
+
+export interface Subject {
+  code: string;
+  name: string;
+  credits: number;
+  score: number;
+  status: SubjectStatus;
+}
+
+export const PASS_THRESHOLD = 5.5;
+
+export const SUBJECTS: Subject[] = [
+  { code: 'TH701', name: 'Lập trình Mobile (React Native)', credits: 3, score: 8.5, status: 'passed' },
+  { code: 'TH702', name: 'Lập trình Web nâng cao', credits: 4, score: 7.8, status: 'passed' },
+  { code: 'TH703', name: 'Cấu trúc dữ liệu & Giải thuật', credits: 2, score: 9.0, status: 'passed' },
+  { code: 'TH704', name: 'Cơ sở dữ liệu nâng cao', credits: 3, score: 6.5, status: 'passed' },
+  { code: 'TH705', name: 'Trí tuệ nhân tạo (AI Basics)', credits: 4, score: 8.2, status: 'passed' },
+  { code: 'TH706', name: 'Mạng máy tính & Truyền thông', credits: 2, score: 4.8, status: 'failed' },
+  { code: 'TH707', name: 'Hệ điều hành & Hệ thống nhúng', credits: 3, score: 7.0, status: 'passed' },
+  { code: 'TH708', name: 'Kiến trúc phần mềm', credits: 4, score: 5.2, status: 'retake' },
+  { code: 'TH709', name: 'Điện toán đám mây (Cloud)', credits: 2, score: 8.8, status: 'passed' },
+  { code: 'TH710', name: 'An toàn và bảo mật thông tin', credits: 3, score: 7.5, status: 'passed' },
+  { code: 'TH711', name: 'Thực tập đồ án chuyên ngành', credits: 4, score: 6.0, status: 'passed' },
+];
+
+export function average(list: Subject[]): number {
+  if (!list || list.length === 0) return 0;
+  const totalWeightedScore = list.reduce((sum, s) => sum + (s.score * s.credits), 0);
+  const totalCredits = list.reduce((sum, s) => sum + s.credits, 0);
+  if (totalCredits === 0) return 0;
+  const avg = totalWeightedScore / totalCredits;
+  return Math.round((avg + Number.EPSILON) * 100) / 100;
+}
+
+export function passCount(list: Subject[], threshold: number = PASS_THRESHOLD): number {
+  if (!list) return 0;
+  return list.filter((s) => s.score >= threshold).length;
+}
+
+export function topThree(list: Subject[]): Subject[] {
+  if (!list) return [];
+  return [...list]
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 3);
+}
+
+export function byStatus(list: Subject[]): Record<SubjectStatus, number> {
+  const initialCounts: Record<SubjectStatus, number> = {
+    passed: 0,
+    failed: 0,
+    in_progress: 0,
+    retake: 0,
+  };
+  if (!list) return initialCounts;
+  return list.reduce((acc, s) => {
+    acc[s.status] = (acc[s.status] ?? 0) + 1;
+    return acc;
+  }, { ...initialCounts });
+}
